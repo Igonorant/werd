@@ -24,6 +24,36 @@ bool GuessIsValid(const std::string& guess, const std::vector<std::string>& word
 	return false;
 }
 
+std::vector<int> GenerateBucket(const std::string& str) {
+
+	std::vector<int> bucket(26, 0);
+	for (const char& c : str) {
+		bucket[c - 'a']++;
+	}
+	return bucket;
+}
+
+int CalculateScore(const std::string& guess, const std::string& target) {
+	
+	std::vector<int> bucketGuess = GenerateBucket(guess);
+	std::vector<int> bucketTarget = GenerateBucket(target);
+	int score = 0;
+
+	// calculate score based on letter match
+	for (size_t i = 0; i < bucketGuess.size(); i++) {
+		score += std::min(bucketGuess[i], bucketTarget[i]);
+	}
+
+	// increase score based on position match
+	for (size_t i = 0; i < target.size();i++) {
+		if (guess[i] == target[i]) {
+			score++;
+		}
+	}
+
+	return score;
+}
+
 int main() {
 
 	// read words database and store in a vector
@@ -66,8 +96,19 @@ int main() {
 			c = std::tolower(c);
 		}
 
+		// check if the guess is valid and calculate score
 		if (GuessIsValid(guess, words_database)) {
-			std::cout << "Valid guess!" << std::endl;
+
+			int score = CalculateScore(guess, target);
+
+			// check if the player won
+			if (score == 10){
+				std::cout<< "-----------------------------" << std::endl <<
+							"That's a motherfucking match!" << std::endl <<
+							"-----------------------------" << std::endl;
+				break;
+			}
+			std::cout << "Score: " << score << std::endl;
 		}
 		else {
 			std::cout << "Invalid guess! Try again..." << std::endl;
